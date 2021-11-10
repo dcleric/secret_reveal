@@ -20,7 +20,7 @@ func main() {
 	} else {
 		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
 	}
-	serviceName := flag.String("sn", "", "service name")
+	serviceNames := flag.String("sn", "", "service names separated by comma")
 	nameSpace := flag.String("ns", "", "namespace")
 	wildCard := flag.String("wc", "", "wildcard")
 	flag.Parse()
@@ -34,13 +34,16 @@ func main() {
 		panic(err)
 	}
 
-	secret, err := clientset.CoreV1().Secrets(*nameSpace).Get(context.TODO(), *serviceName, metav1.GetOptions{})
-	if err != nil {
-		panic(err)
-	}
-	for key, value := range secret.Data {
-		if strings.Contains(key,*wildCard) {
-			fmt.Printf("    %s: %s\n", key, value)
-			}
+	for _, service := range strings.Split(*serviceNames, ",") {
+		secret, err := clientset.CoreV1().Secrets(*nameSpace).Get(context.TODO(), service, metav1.GetOptions{})
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("%s\n",service)
+		for key, value := range secret.Data {
+			if strings.Contains(key,*wildCard) {
+				fmt.Printf("    %s: %s\n", key, value)
+				}
+		}
 	}
 }
