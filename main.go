@@ -22,7 +22,8 @@ func main() {
 	}
 	serviceNames := flag.String("sn", "", "service names separated by comma")
 	nameSpace := flag.String("ns", "", "namespace")
-	wildCard := flag.String("wc", "", "wildcard")
+	wildCard := flag.String("wc", "", "wildcard to match portion of the key")
+	varEnable := flag.Bool("var", false, "check configmap vars as well")
 	flag.Parse()
 
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
@@ -43,6 +44,17 @@ func main() {
 		for key, value := range secret.Data {
 			if strings.Contains(key,*wildCard) {
 				fmt.Printf("    %s: %s\n", key, value)
+				}
+		}
+		if *varEnable {
+			configmap, err := clientset.CoreV1().ConfigMaps(*nameSpace).Get(context.TODO(), service, metav1.GetOptions{})
+			if err != nil {
+				panic(err)
+			}
+			for key, value := range configmap.Data {
+				if strings.Contains(key,*wildCard) {
+					fmt.Printf("    %s: %s\n", key, value)
+					}
 				}
 		}
 	}
