@@ -19,3 +19,5 @@ node {
             docker.image('golangci/golangci-lint:v1.43.0').withRun('--rm -v $(pwd):/app -w /app') { c ->
                 sh 'golangci-lint run -v'}
         }
+    }
+}
